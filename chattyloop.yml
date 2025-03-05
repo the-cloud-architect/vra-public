@@ -1,9 +1,9 @@
 ---
-- hosts: all
-  gather_facts: no
+- hosts: vms
+  become: yes
   vars:
-    message_size: 1024  # message size in Bytes [1KB]
-    log_file: "/var/log/chatty_messages.log"  # where messages will be logged on the VM
+    message_size: 1024  # Message size in Bytes [1KB]
+    log_file: "/var/log/chatty_messages.log"  # Where messages will be logged on the VM
   tasks:
     - name: Ensure log directory exists
       file:
@@ -28,7 +28,7 @@
               with open(log_file, "a") as f:
                   timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
                   f.write(f"{timestamp} - {message}\n")
-              time.sleep(1)  # Adjust sleep time as needed (1 second here)
+              time.sleep(1)  # 1-second interval between messages
 
     - name: Run the message generator in the background
       shell: "nohup /usr/local/bin/chatty_generator.py &"
