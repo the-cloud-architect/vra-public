@@ -1,0 +1,38 @@
+---
+- hosts: all
+  gather_facts: no
+  vars:
+    message_size: 1024  # message size in Bytes [1KB]
+    log_file: "/var/log/chatty_messages.log"  # where messages will be logged on the VM
+  tasks:
+    - name: Ensure log directory exists
+      file:
+        path: "/var/log"
+        state: directory
+        mode: "0755"
+
+    - name: Deploy message generator script
+      copy:
+        dest: "/usr/local/bin/chatty_generator.py"
+        mode: "0755"
+        content: |
+          #!/usr/bin/env python3
+          import time
+          import os
+          
+          message_size = {{ message_size }}
+          log_file = "{{ log_file }}"
+          message = "$" * message_size
+          
+          while True:
+              with open(log_file, "a") as f:
+                  timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+                  f.write(f"{timestamp} - {message}\n")
+              time.sleep(1)  # Adjust sleep time as needed (1 second here)
+
+    - name: Run the message generator in the background
+      shell: "nohup /usr/local/bin/chatty_generator.py &"
+      args:
+        creates: "/usr/local/bin/chatty_generator.py"  # Only runs if script wasn’t already there
+      async: 0  # Don’t wait for it to finish
+      poll: 0   # Detach immediately
