@@ -1,5 +1,5 @@
 ---
-- hosts: vms
+- hosts: all  # Targets all hosts in the inventory, filtered at runtime
   become: yes
   vars:
     message_size: 1024  # Message size in Bytes [1KB]
